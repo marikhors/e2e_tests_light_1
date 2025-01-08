@@ -1,47 +1,76 @@
 package io.testomat.e2e_tests_light_1;
 
-import com.codeborne.selenide.Condition;
+import io.testomat.e2e_tests_light_1.web.pages.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.*;
+public class ProjectPageTests extends BaseTest {
 
-public class ProjectPageTests {
 
-    @Test
-    public void findProjectWithTests() {
-        open("https://app.testomat.io/");
-        //login user
-        $("#content-desktop #user_email").setValue("mkhorsun13@gmail.com");
-        $("#content-desktop #user_password").setValue("CD6YMHG!tn5!pcS");
-        $("#content-desktop #user_remember_me").click();
-        $("#content-desktop [name=commit]").click();
-        $(".common-flash-success").shouldBe(Condition.visible);
+    private static final ProjectsPage projectsPage = new ProjectsPage();
+    private static final SignInPage signInPage = new SignInPage();
+    private static final AutomotiveProjectPage automotiveProjectPage = new AutomotiveProjectPage();
+    private static final ListViewPage listViewPage = new ListViewPage();
+    static String username = env.get("USERNAME");
+    static String password = env.get("PASSWORD");
+    private final ProjectPage projectPage = new ProjectPage();
+    String targetProjectName = "Manufacture light";
+    String automotiveProject = "Automotive, Baby & Music";
 
-        //search project
-        $("#search").setValue("manufacture light");
-        //select project
-        $(byText("Manufacture light")).click();
-        sleep(10000);
-        //wait for project
-        $("h2").shouldHave(Condition.text("Manufacture light"));
+    @BeforeAll
+    static void openTestomatAndLogin() {
+        signInPage.open();
+        signInPage.loginUser(username, password);
+        projectsPage.signInSuccess();
+    }
+
+    @BeforeEach
+    void openProjectsPage() {
+        projectsPage.open();
+        projectsPage.isLoaded();
     }
 
     @Test
-    public void verifyListView() {
-        open("https://app.testomat.io/");
-        $("#table-icon").click();
-        sleep(10000);
-        $(byText("Automotive, Baby & Music")).click();
-        $("h2").shouldHave(Condition.text("Automotive, Baby & Music"));
+    public void userCanFindProjectWithTests() {
+        projectsPage.isLoaded();
+        projectsPage.searchForProject(targetProjectName);
+        projectsPage.selectProject(targetProjectName);
+        projectPage.isLoaded(targetProjectName);
+    }
 
+
+  /*  @Test
+    public void totalNumberOfProjectsTest() {
+
+        projectsPage.searchForProject(targetProjectName);
+
+        var targetProject = projectsPage.countOfProjectsShouldBeEqualTo(1).first();
+
+        projectsPage.countOfTestsCasesShouldBeEqualTo(targetProject, 0);
+        projectsPage.totalCountOfProjectsIsVisible();
+
+        var totalProjects = projectsPage.getTotalCountOfTestCases();
+        var actualCountOfTotalTests = parseIntegerFromString(totalProjects);
+        Assertions.assertTrue(actualCountOfTotalTests > 100);
+    }
+*/
+
+    @Test
+    public void verifyListViewTest() {
+        projectsPage.isLoaded();
+        listViewPage.selectListView();
+        projectsPage.isLoaded();
+        automotiveProjectPage.selectAutomotiveProject(automotiveProject);
+        listViewPage.titleOfAutomotiveProject(automotiveProject);
     }
 
     @Test
-    public void verifyReadMeDoc() {
-        open("https://app.testomat.io/projects/automotive-baby-music/");
-        $("#ember40").click();
-        $("#ember66").click();
-
+    public void verifyReadMeDocTest() {
+        projectsPage.isLoaded();
+        automotiveProjectPage.searchForAutomotiveProject(automotiveProject);
+        automotiveProjectPage.selectAutomotiveProject(automotiveProject);
+        automotiveProjectPage.clickOnReadMeButton();
+        automotiveProjectPage.clickOnIGotItButton();
     }
 }
